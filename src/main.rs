@@ -20,9 +20,24 @@ impl TreeNode {
         self.children.push(child);
     }
 
+    fn set_parent(&mut self, parent: Option<Rc<RefCell<TreeNode>>>) {
+        self.parent = parent;
+    }
+
     fn delete_child(&mut self, child: Rc<RefCell<TreeNode>>) {
         if let Some(index) = self.children.iter().position(|c| Rc::ptr_eq(c, &child)) {
             self.children.remove(index);
+        }
+    }
+
+    fn print_node(&self) {
+        match &self.node {
+            Node::Title(title) => {
+                println!("node : {}", title);
+            }
+            Node::Bookmark(bookmark_name, bookmark_url) => {
+                println!("node : {}[{}]", bookmark_name, bookmark_url);
+            }
         }
     }
 
@@ -69,6 +84,10 @@ fn main() {
     let root = process_file_contents(&file_content);
 
     root.borrow().print_tree("", true);
+
+    if let Some(target_node) = find_node(root, "个人收藏") {
+        target_node.borrow().print_node();
+    }
 }
 
 fn ensure_file_exists(file_path: &str) {
@@ -160,4 +179,30 @@ fn process_file_contents(file_contents: &String) -> Rc<RefCell<TreeNode>> {
         }
     }
     root
+}
+
+fn find_node(
+    current_node: Rc<RefCell<TreeNode>>,
+    target_name: &str,
+) -> Option<Rc<RefCell<TreeNode>>> {
+    match &current_node.borrow().node {
+        Node::Title(title) => {
+            if title == target_name {
+                return Some(current_node.clone());
+            }
+        }
+        Node::Bookmark(bookmark_name, _) => {
+            if bookmark_name == target_name {
+                return Some(current_node.clone());
+            }
+        }
+    }
+
+    for child in &current_node.borrow().children {
+        if let Some(matching_node) = find_node(child.clone(), target_name) {
+            return Some(matching_node);
+        }
+    }
+
+    None
 }
