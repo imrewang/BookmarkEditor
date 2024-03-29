@@ -20,18 +20,30 @@ impl TreeNode {
         self.children.push(child);
     }
 
-    fn print_tree(&self, prefix: &str) {
+    fn print_tree(&self, prefix: &str, is_last_sibling: bool) {
         match &self.node {
             Node::Title(title) => {
-                println!("{}└── {}", prefix, title);
+                let branch = if is_last_sibling {
+                    "└── "
+                } else {
+                    "├── "
+                };
+                println!("{}{}{}", prefix, branch, title);
             }
-            Node::Bookmark(title, url) => {
-                println!("{}└── [{}]", prefix, title);
+            Node::Bookmark(bookmark_name, _) => {
+                let branch = if is_last_sibling {
+                    "└── "
+                } else {
+                    "├── "
+                };
+                println!("{}{}{}", prefix, branch, bookmark_name);
             }
         }
 
-        for child in &self.children {
-            child.borrow().print_tree(&(prefix.to_string() + "    "));
+        for (index, child) in self.children.iter().enumerate() {
+            let is_last_child = index == self.children.len() - 1;
+            let new_prefix = format!("{}{}   ", prefix, if is_last_sibling { " " } else { "│" });
+            child.borrow().print_tree(&new_prefix, is_last_child);
         }
     }
 }
@@ -54,6 +66,8 @@ fn main() {
     let file_content = load_file_contents(&file_path);
 
     let root = process_file_contents(&file_content);
+
+    root.borrow().print_tree("", true);
 }
 
 fn ensure_file_exists(file_path: &str) {
