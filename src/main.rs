@@ -20,23 +20,24 @@ impl TreeNode {
         self.children.push(child);
     }
 
+    fn delete_child(&mut self, child: Rc<RefCell<TreeNode>>) {
+        if let Some(index) = self.children.iter().position(|c| Rc::ptr_eq(c, &child)) {
+            self.children.remove(index);
+        }
+    }
+
     fn print_tree(&self, prefix: &str, is_last_sibling: bool) {
+        let branch = if is_last_sibling {
+            "└── "
+        } else {
+            "├── "
+        };
         match &self.node {
             Node::Title(title) => {
-                let branch = if is_last_sibling {
-                    "└── "
-                } else {
-                    "├── "
-                };
                 println!("{}{}{}", prefix, branch, title);
             }
             Node::Bookmark(bookmark_name, _) => {
-                let branch = if is_last_sibling {
-                    "└── "
-                } else {
-                    "├── "
-                };
-                println!("{}{}{}", prefix, branch, bookmark_name);
+                println!("{}{}[{}]", prefix, branch, bookmark_name);
             }
         }
 
@@ -97,14 +98,29 @@ fn save_file_contents(file_path: &str, content: &str) {
 
 fn process_file_contents(file_contents: &String) -> Rc<RefCell<TreeNode>> {
     let lines: Vec<&str> = file_contents.lines().collect();
+    let mut start_index = 0;
+
+    // 忽略前导空白行
+    for (index, line) in lines.iter().enumerate() {
+        if !line.trim().is_empty() {
+            start_index = index;
+            break;
+        }
+    }
+
+    // 从第一个非空行获取名称
+    let name = lines[start_index]
+        .trim_start_matches('#')
+        .trim()
+        .to_string();
     let root = Rc::new(RefCell::new(TreeNode {
-        node: Node::Title("书签栏".to_string()),
+        node: Node::Title(name),
         children: Vec::new(),
         parent: None,
     }));
     let mut stack: Vec<Rc<RefCell<TreeNode>>> = vec![Rc::clone(&root)];
 
-    for line in lines {
+    for line in lines.iter().skip(start_index + 1) {
         let trimmed_line = line.trim();
         if trimmed_line.is_empty() {
             continue;
@@ -113,7 +129,7 @@ fn process_file_contents(file_contents: &String) -> Rc<RefCell<TreeNode>> {
         if trimmed_line.starts_with("#") {
             let level = trimmed_line.chars().take_while(|c| *c == '#').count();
             let name = trimmed_line.trim_start_matches('#').trim().to_string();
-            while stack.len() > level {
+            while stack.len() > level - 1 {
                 stack.pop();
             }
 
