@@ -1,5 +1,4 @@
 use std::cell::RefCell;
-use std::char::DecodeUtf16;
 use std::env;
 use std::fs;
 use std::rc::Rc;
@@ -34,10 +33,10 @@ impl TreeNode {
     fn print_node(&self) {
         match &self.data {
             DataType::Title(title) => {
-                println!("node : {}", title);
+                println!("\nnode : {}", title);
             }
             DataType::Bookmark(bookmark_name, bookmark_url) => {
-                println!("node : {}[{}]", bookmark_name, bookmark_url);
+                println!("\nnode : {}[{}]", bookmark_name, bookmark_url);
             }
         }
     }
@@ -84,23 +83,28 @@ fn main() {
 
     let root = process_file_contents(&file_content);
 
-    root.borrow().print_tree("", true);
+    root.borrow().print_tree("0", true);
 
-    if let Some(target_node) = find_node(&root, "个人收藏") {
-        target_node.borrow().print_node();
-    }
-    let new_node = Rc::new(RefCell::new(TreeNode {
-        data: DataType::Title("new_node".to_string()),
+    let test_node = Rc::new(RefCell::new(TreeNode {
+        data: DataType::Bookmark("bookmark_name".to_string(), "bookmark_url".to_string()),
         children: Vec::new(),
         parent: None,
     }));
-    add_node(&root, new_node, None);
-    root.borrow().print_tree("", true);
+    let a = add_node_by_name(&root, "个人收藏", test_node);
+    a.borrow().print_node();
+    root.borrow().print_tree("1", true);
 
-    if let Some(deleted_node) = delete_node(&root, "new_node") {
-        deleted_node.borrow().print_tree("@", true)
-    }
-    root.borrow().print_tree("", true);
+    let b = delete_node_by_name(&root, "函数式");
+    b.borrow().print_node();
+    root.borrow().print_tree("2", true);
+
+    let c = add_node_by_node(b);
+    c.borrow().print_node();
+    root.borrow().print_tree("3", true);
+
+    let d = delete_node_by_node(a);
+    d.borrow().print_node();
+    root.borrow().print_tree("4", true);
 }
 
 fn ensure_file_exists(file_path: &str) {
@@ -190,25 +194,29 @@ fn process_file_contents(file_contents: &String) -> Rc<RefCell<TreeNode>> {
     root
 }
 
-fn find_node(
-    current_node: &Rc<RefCell<TreeNode>>,
-    target_name: &str,
+fn find_node_by_name(
+    root: &Rc<RefCell<TreeNode>>,
+    target_name: Option<&str>,
 ) -> Option<Rc<RefCell<TreeNode>>> {
-    match &current_node.borrow().data {
-        DataType::Title(title) => {
-            if title == target_name {
-                return Some(current_node.clone());
+    if let Some(name) = target_name {
+        match &root.borrow().data {
+            DataType::Title(title) => {
+                if title == name {
+                    return Some(root.clone());
+                }
+            }
+            DataType::Bookmark(bookmark_name, _) => {
+                if bookmark_name == name {
+                    return Some(root.clone());
+                }
             }
         }
-        DataType::Bookmark(bookmark_name, _) => {
-            if bookmark_name == target_name {
-                return Some(current_node.clone());
-            }
-        }
+    } else {
+        return Some(root.clone());
     }
 
-    for child in &current_node.borrow().children {
-        if let Some(matching_node) = find_node(&child.clone(), target_name) {
+    for child in &root.borrow().children {
+        if let Some(matching_node) = find_node_by_name(&child.clone(), target_name) {
             return Some(matching_node);
         }
     }
@@ -216,38 +224,57 @@ fn find_node(
     None
 }
 
+fn get_parent_node(current_node: &Rc<RefCell<TreeNode>>) -> Rc<RefCell<TreeNode>> {
+    let parent = current_node.borrow().parent.clone().unwrap();
+    parent
+}
+
 fn add_node(
-    root: &Rc<RefCell<TreeNode>>,
     new_node: Rc<RefCell<TreeNode>>,
-    parent_name: Option<&str>,
-) {
-    if let Some(parent_name) = parent_name {
-        if let Some(parent_node) = find_node(root, parent_name) {
-            if let DataType::Bookmark(_, _) = &parent_node.borrow().data {
-                panic!("父节点 {} 是书签类型，无法添加子节点", parent_name);
-            }
-            new_node
-                .borrow_mut()
-                .set_parent(Some(Rc::clone(&parent_node)));
-            parent_node.borrow_mut().add_child(Rc::clone(&new_node));
-        } else {
-            panic!("父节点 {} 未找到", parent_name);
+    parent_node: Rc<RefCell<TreeNode>>,
+) -> Rc<RefCell<TreeNode>> {
+    new_node
+        .borrow_mut()
+        .set_parent(Some(Rc::clone(&parent_node)));
+    parent_node.borrow_mut().add_child(Rc::clone(&new_node));
+    new_node
+}
+
+fn add_node_by_node(current_node: Rc<RefCell<TreeNode>>) -> Rc<RefCell<TreeNode>> {
+    let parent_node = get_parent_node(&current_node);
+    add_node(Rc::clone(&current_node), parent_node);
+    current_node // 返回当前节点
+}
+
+fn add_node_by_name(
+    root: &Rc<RefCell<TreeNode>>,
+    parent_name: &str,
+    new_node: Rc<RefCell<TreeNode>>,
+) -> Rc<RefCell<TreeNode>> {
+    if let Some(parent_node) = find_node_by_name(root, Some(parent_name)) {
+        if let DataType::Bookmark(_, _) = &parent_node.borrow().data {
+            panic!("父节点 {} 是书签类型，无法添加子节点", parent_name);
         }
+        add_node(Rc::clone(&new_node), parent_node);
+        new_node // 返回新节点
     } else {
-        new_node.borrow_mut().set_parent(Some(Rc::clone(&root)));
-        root.borrow_mut().add_child(new_node);
+        panic!("父节点 {} 未找到", parent_name);
     }
 }
 
-fn delete_node(root: &Rc<RefCell<TreeNode>>, node_name: &str) -> Option<Rc<RefCell<TreeNode>>> {
-    if let Some(node) = find_node(root, node_name) {
-        if let Some(parent_node) = &node.borrow().parent {
-            parent_node.borrow_mut().delete_child(Rc::clone(&node));
-            return Some(node.clone());
-        } else {
-            panic!("不能删除根节点");
-        }
+fn delete_node_by_node(node: Rc<RefCell<TreeNode>>) -> Rc<RefCell<TreeNode>> {
+    if let Some(parent_node) = &node.borrow().parent {
+        parent_node.borrow_mut().delete_child(Rc::clone(&node));
     } else {
-        panic!("节点 {} 未找到", node_name);
+        panic!("不能删除根节点");
+    }
+    node
+}
+
+fn delete_node_by_name(root: &Rc<RefCell<TreeNode>>, target_name: &str) -> Rc<RefCell<TreeNode>> {
+    if let Some(node_to_delete) = find_node_by_name(root, Some(target_name)) {
+        delete_node_by_node(node_to_delete)
+    } else {
+        panic!("节点 {} 未找到", target_name);
     }
 }
