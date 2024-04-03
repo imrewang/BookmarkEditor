@@ -1,4 +1,4 @@
-# 个人2收藏2
+# 个人收藏2
 ## 课程2
 [elearning2](https://elearning.fudan.edu.cn/courses)
 ## 参考资料2

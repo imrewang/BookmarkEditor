@@ -69,17 +69,6 @@ impl Receiver {
         }
     }
 
-    pub fn print_node(&self) {
-        match &self.data {
-            DataType::Title(title) => {
-                println!("\nnode : {}", title);
-            }
-            DataType::Bookmark(bookmark_name, bookmark_url) => {
-                println!("\nnode : {}[{}]", bookmark_name, bookmark_url);
-            }
-        }
-    }
-
     pub fn print_tree(&self, prefix: &str, is_last_sibling: bool) {
         let branch = if is_last_sibling {
             "└── "

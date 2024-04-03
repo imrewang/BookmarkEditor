@@ -21,10 +21,6 @@ pub fn load_file_contents(file_path: &str) -> String {
     }
 }
 
-pub fn save_file_contents(file_path: &str, content: &str) {
-    fs::write(file_path, content).expect("保存文件时出错");
-}
-
 pub fn process_file_contents(file_contents: &String) -> Rc<RefCell<Receiver>> {
     let lines: Vec<&str> = file_contents.lines().collect();
     let mut start_index = 0;
@@ -70,4 +66,41 @@ pub fn process_file_contents(file_contents: &String) -> Rc<RefCell<Receiver>> {
         }
     }
     root
+}
+
+fn convert_to_file_contents(root: &Rc<RefCell<Receiver>>) -> String {
+    let mut result = String::new();
+    generate_file_contents(root, &mut result, 1);
+    result
+}
+
+fn generate_file_contents(node: &Rc<RefCell<Receiver>>, result: &mut String, level: i32) {
+    let receiver = node.borrow();
+    match &receiver.get_data() {
+        DataType::Title(title) => {
+            for _ in 0..level {
+                result.push('#');
+            }
+            result.push(' ');
+            result.push_str(&title);
+            result.push('\n');
+        }
+        DataType::Bookmark(bookmark_name, bookmark_url) => {
+            result.push('[');
+            result.push_str(&bookmark_name);
+            result.push_str("](");
+            result.push_str(&bookmark_url);
+            result.push_str(")\n");
+        }
+    }
+
+    let children = receiver.get_children();
+    for child in children {
+        generate_file_contents(&child, result, level + 1);
+    }
+}
+
+pub fn save_file_contents(root: &Rc<RefCell<Receiver>>, file_path: &String) {
+    let content = convert_to_file_contents(&root);
+    fs::write(file_path, content).expect("保存文件时出错");
 }

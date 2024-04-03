@@ -15,7 +15,6 @@ mod file_helper;
 use file_helper::*;
 
 mod receiver_helper;
-use receiver_helper::*;
 
 mod operation;
 use operation::{parse_operation, Operation};
@@ -29,29 +28,6 @@ fn handle_command_line_arguments() -> (Option<Rc<RefCell<Receiver>>>, Option<Str
             ensure_file_exists(&file_path);
             let file_content = load_file_contents(&file_path);
             let root = process_file_contents(&file_content);
-
-            root.borrow().print_tree("0", true);
-            {
-                let test_node = Receiver::new_without_parent(receiver::DataType::Bookmark(
-                    "bookmark_name".to_string(),
-                    "bookmark_url".to_string(),
-                ));
-                let a = add_node_by_name(&root, "个人收藏", test_node);
-                a.borrow().print_node();
-                root.borrow().print_tree("1", true);
-
-                let b = delete_node_by_name(&root, "函数式");
-                b.borrow().print_node();
-                root.borrow().print_tree("2", true);
-
-                let c = add_node_by_node(b);
-                c.borrow().print_node();
-                root.borrow().print_tree("3", true);
-
-                let d = delete_node_by_node(a);
-                d.borrow().print_node();
-                root.borrow().print_tree("4", true);
-            }
             (Some(root), Some(file_path))
         }
         _ => {
@@ -64,6 +40,7 @@ fn handle_command_line_arguments() -> (Option<Rc<RefCell<Receiver>>>, Option<Str
 fn handle_user_input(mut root: Option<Rc<RefCell<Receiver>>>, mut file_path: Option<String>) {
     //let mut command_processor = CommandProcessor::new();
     let mut invoker = Invoker::new();
+    let mut current_node = root.clone();
     loop {
         print!("请输入命令：");
         io::stdout().flush().unwrap();
@@ -89,19 +66,38 @@ fn handle_user_input(mut root: Option<Rc<RefCell<Receiver>>>, mut file_path: Opt
             Operation::Bookmark => {
                 let parts: Vec<&str> = operation_content.split_whitespace().collect();
                 file_path = Some(parts[1].to_string());
-                ensure_file_exists(file_path.clone().unwrap().as_str());
-                let file_content = load_file_contents(file_path.clone().unwrap().as_str());
-                root = Some(process_file_contents(&file_content));
-                println!("bookmark src\\test.md");
+                if let Some(file_path) = &file_path {
+                    ensure_file_exists(&file_path);
+                    let file_content = load_file_contents(&file_path);
+                    root = Some(process_file_contents(&file_content));
+                    current_node = root.clone();
+                }
             }
-            Operation::Save => (),
+            Operation::Save => {
+                if let (Some(root), Some(file_path)) = (&root, &file_path) {
+                    save_file_contents(&root, &file_path);
+                }
+            }
             Operation::Undo => invoker.undo_command(),
             Operation::Redo => invoker.redo_command(),
             Operation::ShowTree => {
-                root.clone().unwrap().borrow().print_tree("", true);
+                if let Some(root) = &root {
+                    root.borrow().print_tree("", true);
+                }
             }
-            Operation::LsTree => (),
-            Operation::Help => (),
+            Operation::Cd => {
+                let parts: Vec<&str> = operation_content.split_whitespace().collect();
+                let target_name = Some(parts[2]);
+                if let Some(root) = &root {
+                    current_node = receiver_helper::find_node_by_name(root, target_name);
+                }
+            }
+            Operation::LsTree => {
+                if let Some(current_node) = &current_node {
+                    current_node.borrow().print_tree("", true);
+                }
+            }
+            Operation::Help => operation::print_help(),
             Operation::Add => {
                 let command =
                     command::new_addcommand(root.clone().unwrap(), operation_content.to_string());
@@ -114,6 +110,7 @@ fn handle_user_input(mut root: Option<Rc<RefCell<Receiver>>>, mut file_path: Opt
                 );
                 invoker.execute_command(command);
             }
+            Operation::Exit => break,
             Operation::Invalid => println!("无效 Operation"),
         }
     }

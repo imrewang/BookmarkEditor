@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use super::receiver::{DataType, Receiver};
 
-fn find_node_by_name(
+pub fn find_node_by_name(
     root: &Rc<RefCell<Receiver>>,
     target_name: Option<&str>,
 ) -> Option<Rc<RefCell<Receiver>>> {
