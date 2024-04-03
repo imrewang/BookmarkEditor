@@ -4,7 +4,6 @@ use std::io::{self, Write};
 use std::rc::Rc;
 
 mod command;
-use command::{new_addcommand, new_deletecommand, AddCommand, Command};
 
 mod receiver;
 use receiver::Receiver;
@@ -21,15 +20,16 @@ use receiver_helper::*;
 mod operation;
 use operation::{parse_operation, Operation};
 
-fn handle_command_line_arguments() -> Option<Rc<RefCell<Receiver>>> {
+fn handle_command_line_arguments() -> (Option<Rc<RefCell<Receiver>>>, Option<String>) {
     let args: Vec<String> = env::args().collect();
     match args.len() {
-        2 => None,
+        2 => (None, None),
         3 => {
-            let file_path = &args[2];
+            let file_path = args[2].clone();
             ensure_file_exists(&file_path);
             let file_content = load_file_contents(&file_path);
             let root = process_file_contents(&file_content);
+
             root.borrow().print_tree("0", true);
             {
                 let test_node = Receiver::new_without_parent(receiver::DataType::Bookmark(
@@ -52,16 +52,16 @@ fn handle_command_line_arguments() -> Option<Rc<RefCell<Receiver>>> {
                 d.borrow().print_node();
                 root.borrow().print_tree("4", true);
             }
-            Some(root)
+            (Some(root), Some(file_path))
         }
         _ => {
             println!("open参数指定错误，请重新指定。");
-            None
+            (None, None)
         }
     }
 }
 
-fn handle_user_input(root: &Option<Rc<RefCell<Receiver>>>) {
+fn handle_user_input(mut root: Option<Rc<RefCell<Receiver>>>, mut file_path: Option<String>) {
     //let mut command_processor = CommandProcessor::new();
     let mut invoker = Invoker::new();
     loop {
@@ -75,12 +75,8 @@ fn handle_user_input(root: &Option<Rc<RefCell<Receiver>>>) {
 
         // 在这里，我们根据root的值和操作类型来执行相应的逻辑
         match operation {
-            Operation::Bookmark => {
-                // 不管root是否为空，都可以执行
-                continue;
-            }
+            Operation::Bookmark => (),
             _ => {
-                // 如果root为空，并且操作不是Bookmark，则报错
                 if root.is_none() {
                     println!("无效命令：当前没有可用的根节点，无法执行该命令。");
                     continue;
@@ -91,8 +87,12 @@ fn handle_user_input(root: &Option<Rc<RefCell<Receiver>>>) {
         // root非空，可以执行所有命令
         match operation {
             Operation::Bookmark => {
-                println!("Bookmark");
-                // 不管root是否为空，都可以执行
+                let parts: Vec<&str> = operation_content.split_whitespace().collect();
+                file_path = Some(parts[1].to_string());
+                ensure_file_exists(file_path.clone().unwrap().as_str());
+                let file_content = load_file_contents(file_path.clone().unwrap().as_str());
+                root = Some(process_file_contents(&file_content));
+                println!("bookmark src\\test.md");
             }
             Operation::Save => (),
             Operation::Undo => invoker.undo_command(),
@@ -107,13 +107,19 @@ fn handle_user_input(root: &Option<Rc<RefCell<Receiver>>>) {
                     command::new_addcommand(root.clone().unwrap(), operation_content.to_string());
                 invoker.execute_command(command);
             }
-            Operation::Delete => (),
-            Operation::Invalid => println!("无效命令"),
+            Operation::Delete => {
+                let command = command::new_deletecommand(
+                    root.clone().unwrap(),
+                    operation_content.to_string(),
+                );
+                invoker.execute_command(command);
+            }
+            Operation::Invalid => println!("无效 Operation"),
         }
     }
 }
 
 fn main() {
-    let root = handle_command_line_arguments();
-    handle_user_input(&root);
+    let (root, file_path) = handle_command_line_arguments();
+    handle_user_input(root, file_path);
 }

@@ -66,7 +66,7 @@ impl Command for AddCommand {
             }
 
             _ => {
-                println!("未知命令：{}", self.command_content);
+                println!("未知 add 命令：{}", self.command_content);
             }
         }
     }

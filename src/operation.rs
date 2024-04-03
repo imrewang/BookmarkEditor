@@ -29,8 +29,8 @@ pub fn parse_operation(input: &str) -> Operation {
         Some(&"show-tree") => Operation::ShowTree,
         Some(&"ls-tree") => Operation::LsTree,
         Some(&"help") => Operation::Help,
-        Some(&"add") => parse_add_operation(&tokens),
-        Some(&"delete") => parse_delete_operation(&tokens),
+        Some(&"add-title") | Some(&"add-bookmark") => parse_add_operation(&tokens),
+        Some(&"delete-title") | Some(&"delete-bookmark") => parse_delete_operation(&tokens),
         _ => Operation::Invalid,
     }
 }
