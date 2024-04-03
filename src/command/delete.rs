@@ -6,21 +6,21 @@ use super::super::receiver_helper::*;
 use super::{remove_quotes, Command};
 
 #[derive(Clone)]
-pub struct AddCommand {
+pub struct DeleteCommand {
     root: Rc<RefCell<Receiver>>,
     command_content: String,
     current_node: Option<Rc<RefCell<Receiver>>>,
 }
 
-pub fn new_addcommand(root: Rc<RefCell<Receiver>>, command_content: String) -> Box<dyn Command> {
-    Box::new(AddCommand {
+pub fn new_deletecommand(root: Rc<RefCell<Receiver>>, command_content: String) -> Box<dyn Command> {
+    Box::new(DeleteCommand {
         root,
         command_content,
         current_node: None,
     })
 }
 
-impl Command for AddCommand {
+impl Command for DeleteCommand {
     fn execute(&mut self) {
         let parts: Vec<&str> = self.command_content.split_whitespace().collect();
 

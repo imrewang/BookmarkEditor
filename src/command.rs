@@ -1,16 +1,19 @@
-use std::cell::RefCell;
-use std::rc::Rc;
-
 mod add;
-pub use add::AddCommand;
+mod delete;
 
-pub use super::receiver::Receiver;
+pub use add::{new_addcommand, AddCommand};
+pub use delete::{new_deletecommand, DeleteCommand};
 
-/// Declares a method for executing (and undoing) a command.
-///
-/// Each command receives an application context to access
-/// visual components (e.g. edit view) and a clipboard.
 pub trait Command {
     fn execute(&mut self);
-    fn undo(&mut self, node: Rc<RefCell<Receiver>>);
+    fn undo(&mut self);
+    fn redo(&mut self);
+}
+
+fn remove_quotes(input: &str) -> &str {
+    if input.len() >= 2 && input.starts_with('"') && input.ends_with('"') {
+        &input[1..input.len() - 1]
+    } else {
+        input
+    }
 }
