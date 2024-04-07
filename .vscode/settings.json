@@ -45,6 +45,11 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "typeinfo": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "fstream": "cpp",
+        "bitset": "cpp",
+        "ctime": "cpp",
+        "regex": "cpp",
+        "sstream": "cpp"
     }
 }

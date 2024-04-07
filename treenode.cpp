@@ -1,43 +1,78 @@
 #include "treenode.h" // 包含类的头文件
 
-// 构造函数
-TreeNode::TreeNode(std::string data) : m_data(data), m_children(), m_parent() {}
-TreeNode::TreeNode(std::pair<std::string, std::string> data) : m_data(data), m_children(), m_parent() {}
+TreeNode::TreeNode(std::string data) : m_data(data), m_children(), m_parent()
+{
+    std::cout << "TreeNode constructed with header data" << std::endl;
+}
+TreeNode::TreeNode(std::pair<std::string, std::string> data) : m_data(data), m_children(), m_parent()
+{
+    std::cout << "TreeNode constructed with bookmark data" << std::endl;
+}
 
-// 析构函数
-TreeNode::~TreeNode() {}
+TreeNode::~TreeNode()
+{
+    std::cout << "TreeNode destructed" << std::endl;
+}
 
-// 设置节点的数据
+void TreeNode::printTree(int level) const
+{
+    for (int i = 0; i < level; ++i)
+    {
+        std::cout << (i == level - 1 ? "└── " : "    ");
+    }
+
+    if (std::holds_alternative<std::string>(m_data))
+    {
+        std::cout << std::get<std::string>(m_data) << std::endl;
+    }
+    else if (std::holds_alternative<std::pair<std::string, std::string>>(m_data))
+    {
+        auto linkData = std::get<std::pair<std::string, std::string>>(m_data);
+        std::cout << "[" << linkData.first << "]" << std::endl;
+    }
+
+    for (size_t i = 0; i < m_children.size(); ++i)
+    {
+        m_children[i]->printTree(level + (i == m_children.size() - 1 ? 0 : 1));
+    }
+}
+
 void TreeNode::setData(DataType data)
 {
     m_data = data;
 }
 
-// 设置父节点
 void TreeNode::setParent(std::weak_ptr<TreeNode> parent)
 {
     m_parent = parent;
 }
 
-// 添加子节点
 void TreeNode::addChild(std::shared_ptr<TreeNode> child)
 {
     m_children.push_back(child);
 }
 
-// 获取节点的数据
+void TreeNode::addChildWithParent(std::shared_ptr<TreeNode> child)
+{
+    m_children.push_back(child);
+    child->m_parent = this->shared_from_this(); // 设置子节点的父节点为当前节点
+}
+
+std::shared_ptr<TreeNode> TreeNode::getTreeNode()
+{
+    return shared_from_this();
+}
+
 TreeNode::DataType TreeNode::getData() const
 {
     return m_data;
 }
 
-// 获取子节点的向量
 std::vector<std::shared_ptr<TreeNode>> TreeNode::getChildren() const
 {
     return m_children;
 }
 
-// 获取父节点
 std::weak_ptr<TreeNode> TreeNode::getParent() const
 {
     return m_parent;
