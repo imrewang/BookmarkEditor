@@ -17,7 +17,7 @@ public:
 
     ~TreeNode();
 
-    void printTree(int level = 0) const;
+    void printTree(const std::string &prefix = "", bool isLastSibling = true) const;
 
     // set
     void setData(DataType data);
@@ -28,9 +28,9 @@ public:
 
     void addChildWithParent(std::shared_ptr<TreeNode> child);
 
+    // get
     std::shared_ptr<TreeNode> getTreeNode();
 
-    // get
     DataType getData() const;
 
     std::vector<std::shared_ptr<TreeNode>> getChildren() const;

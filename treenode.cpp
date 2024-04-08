@@ -11,16 +11,24 @@ TreeNode::TreeNode(std::pair<std::string, std::string> data) : m_data(data), m_c
 
 TreeNode::~TreeNode()
 {
-    std::cout << "TreeNode destructed" << std::endl;
+    std::cout << "TreeNode destructed :";
+    if (std::holds_alternative<std::string>(m_data))
+    {
+        std::cout << std::get<std::string>(m_data) << std::endl;
+    }
+    else if (std::holds_alternative<std::pair<std::string, std::string>>(m_data))
+    {
+        auto linkData = std::get<std::pair<std::string, std::string>>(m_data);
+        std::cout << "[" << linkData.first << "]" << std::endl;
+    }
 }
 
-void TreeNode::printTree(int level) const
+void TreeNode::printTree(const std::string &prefix, bool isLastSibling) const
 {
-    for (int i = 0; i < level; ++i)
-    {
-        std::cout << (i == level - 1 ? "└── " : "    ");
-    }
+    std::cout << prefix;
+    std::cout << (isLastSibling ? "└── " : "├── ");
 
+    // 输出节点的数据
     if (std::holds_alternative<std::string>(m_data))
     {
         std::cout << std::get<std::string>(m_data) << std::endl;
@@ -31,12 +39,15 @@ void TreeNode::printTree(int level) const
         std::cout << "[" << linkData.first << "]" << std::endl;
     }
 
+    // 递归打印子节点
     for (size_t i = 0; i < m_children.size(); ++i)
     {
-        m_children[i]->printTree(level + (i == m_children.size() - 1 ? 0 : 1));
+        bool isLastChild = (i == m_children.size() - 1);
+        m_children[i]->printTree(prefix + (isLastSibling ? "    " : "│   "), isLastChild);
     }
 }
 
+// set
 void TreeNode::setData(DataType data)
 {
     m_data = data;
@@ -58,6 +69,7 @@ void TreeNode::addChildWithParent(std::shared_ptr<TreeNode> child)
     child->m_parent = this->shared_from_this(); // 设置子节点的父节点为当前节点
 }
 
+// get
 std::shared_ptr<TreeNode> TreeNode::getTreeNode()
 {
     return shared_from_this();
