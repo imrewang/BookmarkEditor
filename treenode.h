@@ -12,8 +12,8 @@ public:
     // 数据类型，可以是 字符串 或者 字符串对
     using DataType = std::variant<std::string, std::pair<std::string, std::string>>;
 
-    TreeNode(std::string data);
-    TreeNode(std::pair<std::string, std::string> data);
+    explicit TreeNode(std::string data);
+    explicit TreeNode(std::pair<std::string, std::string> data);
 
     ~TreeNode();
 

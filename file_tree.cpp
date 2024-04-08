@@ -1,6 +1,6 @@
 #include "file_tree.h"
 
-std::vector<std::string> readMarkdownFile(const std::string &filename)
+std::vector<std::string> readFile(const std::string &filename)
 {
     std::vector<std::string> lines;
     std::ifstream file(filename);
@@ -16,7 +16,7 @@ std::vector<std::string> readMarkdownFile(const std::string &filename)
     return lines;
 }
 
-std::shared_ptr<TreeNode> buildTree(const std::vector<std::string> &lines)
+std::shared_ptr<TreeNode> constructTreeFromFile(const std::vector<std::string> &lines)
 {
     std::stack<std::shared_ptr<TreeNode>> stack;
     std::shared_ptr<TreeNode> rootNode;
@@ -86,4 +86,49 @@ std::shared_ptr<TreeNode> buildTree(const std::vector<std::string> &lines)
     }
 
     return rootNode;
+}
+
+void writeTreeNode(std::ofstream &outFile, const std::shared_ptr<TreeNode> &node, int level)
+{
+    if (!node)
+    {
+        return;
+    }
+
+    // 输出节点数据
+    if (std::holds_alternative<std::string>(node->getData()))
+    {
+        for (int i = 0; i < level; ++i)
+        {
+            outFile << "#";
+        }
+        outFile << " ";
+        outFile << std::get<std::string>(node->getData()) << std::endl;
+    }
+    else if (std::holds_alternative<std::pair<std::string, std::string>>(node->getData()))
+    {
+        auto linkData = std::get<std::pair<std::string, std::string>>(node->getData());
+        outFile << "[" << linkData.first << "](" << linkData.second << ")" << std::endl;
+    }
+
+    // 递归写入子节点
+    for (const auto &child : node->getChildren())
+    {
+        writeTreeNode(outFile, child, level + 1);
+    }
+}
+
+void writeTreeToFile(const std::shared_ptr<TreeNode> &root, const std::string &filename)
+{
+    std::ofstream outFile(filename);
+    if (!outFile.is_open())
+    {
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        return;
+    }
+
+    // 写入树的内容
+    writeTreeNode(outFile, root);
+
+    outFile.close();
 }

@@ -5,7 +5,10 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${fileDirname}\\coin\\${fileBasenameNoExtension}.exe", //指定要调试的程序
-            "args": [], //运行时传递给程序的参数数组
+            "args": [
+                "open",
+                "test.md"
+            ], //运行时传递给程序的参数数组
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
