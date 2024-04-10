@@ -97,6 +97,49 @@ std::shared_ptr<TreeNode> TreeNode::findNodeByName(const std::string &name) cons
     return result;
 }
 
+std::shared_ptr<TreeNode> TreeNode::addNodebyNode(const std::shared_ptr<TreeNode> &nodeToAdd)
+{
+    std::shared_ptr<TreeNode> parentNode = nodeToAdd->getParent().lock();
+    if (parentNode)
+    {
+        parentNode->addChild(nodeToAdd);
+    }
+    else
+    {
+        std::cout << "Parent node not found." << std::endl;
+    }
+    return nodeToAdd;
+}
+
+std::shared_ptr<TreeNode> TreeNode::addNodebyName(const std::string &parentName, const DataType &data)
+{
+    auto parentNode = findNodeByName(parentName);
+    if (parentNode)
+    {
+        std::shared_ptr<TreeNode> newNode;
+        if (std::holds_alternative<std::string>(data))
+        {
+            newNode = std::make_shared<TreeNode>(std::get<std::string>(data));
+        }
+        else if (std::holds_alternative<std::pair<std::string, std::string>>(data))
+        {
+            newNode = std::make_shared<TreeNode>(std::get<std::pair<std::string, std::string>>(data));
+        }
+        else
+        {
+            std::cout << "Unsupported data type for parent node." << std::endl;
+            return nullptr;
+        }
+        parentNode->addChildWithParent(newNode);
+        return newNode;
+    }
+    else
+    {
+        std::cout << "Parent node not found." << std::endl;
+        return nullptr;
+    }
+}
+
 std::shared_ptr<TreeNode> TreeNode::deleteNodebyNode(const std::shared_ptr<TreeNode> &nodeToDelete)
 {
     std::shared_ptr<TreeNode> deletedNode;

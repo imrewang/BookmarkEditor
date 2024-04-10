@@ -15,8 +15,13 @@ int main(int argc, char *argv[])
         receiver->printTree("1");
         std::cout << "------------------" << std::endl;
         auto dn = receiver->deleteNodebyName("参考资料");
-        std::cout << ">>>>>>>>>>>>>>>>>" << std::endl;
         receiver->printTree("2");
+        receiver->addNodebyNode(dn);
+        receiver->printTree("3");
+        auto an = receiver->addNodebyName("课程", "test");
+        receiver->printTree("44");
+        receiver->deleteNodebyNode(an);
+        receiver->printTree("55");
         writeTreeToFile(receiver, "test2.md");
         std::cout << "+++++++++" << std::endl;
     }

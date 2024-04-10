@@ -21,6 +21,8 @@ public:
     void printTree(const std::string &prefix = "", bool isLastSibling = true) const;
     std::shared_ptr<TreeNode> findNodeByName(const std::string &name) const;
     // add delete
+    std::shared_ptr<TreeNode> addNodebyNode(const std::shared_ptr<TreeNode> &nodeToAdd);
+    std::shared_ptr<TreeNode> addNodebyName(const std::string &parentName, const DataType &data);
     std::shared_ptr<TreeNode> deleteNodebyNode(const std::shared_ptr<TreeNode> &nodeToDelete);
     std::shared_ptr<TreeNode> deleteNodebyName(const std::string &name);
 
