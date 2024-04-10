@@ -4,6 +4,7 @@
 #include <variant>
 #include <string>
 #include <iostream>
+#include <functional>
 
 class TreeNode : public std::enable_shared_from_this<TreeNode>
 {
@@ -18,30 +19,27 @@ public:
     ~TreeNode();
 
     void printTree(const std::string &prefix = "", bool isLastSibling = true) const;
+    std::shared_ptr<TreeNode> findNodeByName(const std::string &name) const;
+    // add delete
+    std::shared_ptr<TreeNode> deleteNodebyNode(const std::shared_ptr<TreeNode> &nodeToDelete);
+    std::shared_ptr<TreeNode> deleteNodebyName(const std::string &name);
 
     // set
     void setData(DataType data);
-
     void setParent(std::weak_ptr<TreeNode> parent);
-
     void addChild(std::shared_ptr<TreeNode> child);
-
     void addChildWithParent(std::shared_ptr<TreeNode> child);
-
     // get
     std::shared_ptr<TreeNode> getTreeNode();
-
     DataType getData() const;
-
-    std::vector<std::shared_ptr<TreeNode>> getChildren() const;
-
+    std::vector<std::shared_ptr<TreeNode>> &getChildren();
     std::weak_ptr<TreeNode> getParent() const;
 
 private:
     // 数据成员
-    DataType m_data;
+    DataType data_;
     // 子节点的向量
-    std::vector<std::shared_ptr<TreeNode>> m_children;
+    std::vector<std::shared_ptr<TreeNode>> children_;
     // 父节点的弱引用
-    std::weak_ptr<TreeNode> m_parent;
+    std::weak_ptr<TreeNode> parent_;
 };

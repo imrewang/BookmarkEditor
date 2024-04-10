@@ -12,8 +12,13 @@ int main(int argc, char *argv[])
     {
         auto file = readFile("test.md");
         auto receiver = constructTreeFromFile(file);
-        receiver->printTree();
+        receiver->printTree("1");
+        std::cout << "------------------" << std::endl;
+        auto dn = receiver->deleteNodebyName("参考资料");
+        std::cout << ">>>>>>>>>>>>>>>>>" << std::endl;
+        receiver->printTree("2");
         writeTreeToFile(receiver, "test2.md");
+        std::cout << "+++++++++" << std::endl;
     }
     std::cout << "^^^^^^^^^" << std::endl;
     return 0;
