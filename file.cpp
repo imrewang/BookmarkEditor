@@ -1,4 +1,4 @@
-#include "file_tree.h"
+#include "file.h"
 
 std::vector<std::string> readFile(const std::string &filename)
 {
@@ -118,12 +118,12 @@ void writeTreeNode(std::ofstream &outFile, const std::shared_ptr<TreeNode> &node
     }
 }
 
-void writeTreeToFile(const std::shared_ptr<TreeNode> &root, const std::string &filename)
+void writeTreeToFile(const std::shared_ptr<TreeNode> &root, const std::string &filePath)
 {
-    std::ofstream outFile(filename);
+    std::ofstream outFile(filePath);
     if (!outFile.is_open())
     {
-        std::cerr << "Failed to open file: " << filename << std::endl;
+        std::cerr << "Failed to open file: " << filePath << std::endl;
         return;
     }
 

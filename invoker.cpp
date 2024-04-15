@@ -4,51 +4,33 @@ Invoker::Invoker() {}
 
 Invoker::~Invoker()
 {
-    while (!undoStack.empty())
-    {
-        delete undoStack.top();
-        undoStack.pop();
-    }
-    while (!redoStack.empty())
-    {
-        delete redoStack.top();
-        redoStack.pop();
-    }
 }
 
-void Invoker::executeCommand(Command *command)
+void Invoker::executeCommand(std::unique_ptr<Command> command)
 {
     // TODO 1.只加入adddelete 2.clear redo stack
     command->execute();
-    undoStack.push(command);
+    undoStack_.push(std::move(command)); // 保存命令以便可以撤销
 }
 
 void Invoker::undo()
 {
-    if (!undoStack.empty())
+    if (!undoStack_.empty())
     {
-        Command *command = undoStack.top();
-        undoStack.pop();
+        std::unique_ptr<Command> command = std::move(undoStack_.top());
+        undoStack_.pop();
         command->undo();
-        redoStack.push(command);
-    }
-    else
-    {
-        std::cout << "Nothing to undo." << std::endl;
+        redoStack_.push(std::move(command)); // 将命令移至重做栈
     }
 }
 
 void Invoker::redo()
 {
-    if (!redoStack.empty())
+    if (!redoStack_.empty())
     {
-        Command *command = redoStack.top();
-        redoStack.pop();
-        command->redo();
-        undoStack.push(command);
-    }
-    else
-    {
-        std::cout << "Nothing to redo." << std::endl;
+        std::unique_ptr<Command> command = std::move(redoStack_.top());
+        redoStack_.pop();
+        command->execute();
+        undoStack_.push(std::move(command)); // 重做后重新放回撤销栈
     }
 }

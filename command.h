@@ -1,5 +1,6 @@
 #pragma once
-
+#include <sstream>
+#include <iomanip>
 #include "treenode.h"
 
 class Command
@@ -8,29 +9,35 @@ public:
     virtual ~Command()
     {
     }
-    virtual void execute() const = 0;
+    virtual void execute() = 0;
     virtual void undo() = 0;
     virtual void redo() = 0;
 };
 
-class SimpleCommand : public Command
+class AddCommand : public Command
 {
-public:
-    explicit SimpleCommand(std::string pay_load);
-    void execute() const override;
-
 private:
-    std::string pay_load_;
+    std::shared_ptr<TreeNode> receiver_; // 示例中用的是树节点
+    std::shared_ptr<TreeNode> addNode_;
+    std::string input_;
+
+public:
+    AddCommand(std::shared_ptr<TreeNode> receiver, std::string input) : receiver_(receiver), input_(input), addNode_(nullptr) {}
+    void execute() override;
+    void undo() override;
+    void redo() override;
 };
 
-class ComplexCommand : public Command
+class DeleteCommand : public Command
 {
-public:
-    ComplexCommand(TreeNode *receiver, std::string a, std::string b);
-    void execute() const override;
-
 private:
-    TreeNode *receiver_;
-    std::string a_;
-    std::string b_;
+    std::shared_ptr<TreeNode> receiver_;
+    std::shared_ptr<TreeNode> deleteNode_;
+    std::string input_;
+
+public:
+    DeleteCommand(std::shared_ptr<TreeNode> receiver, std::string input) : receiver_(receiver), input_(input), deleteNode_(nullptr) {}
+    void execute() override;
+    void undo() override;
+    void redo() override;
 };

@@ -8,11 +8,11 @@ public:
     Invoker();
     ~Invoker();
 
-    void executeCommand(Command *command);
+    void executeCommand(std::unique_ptr<Command> command);
     void undo();
     void redo();
 
 private:
-    std::stack<Command *> undoStack;
-    std::stack<Command *> redoStack;
+    std::stack<std::unique_ptr<Command>> undoStack_;
+    std::stack<std::unique_ptr<Command>> redoStack_;
 };
