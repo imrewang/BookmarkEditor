@@ -30,3 +30,34 @@ void showHelp()
               << "delete-bookmark \"<名称>\"    - 删除指定书签\n"
               << "exit    - 退出程序\n";
 }
+
+// 执行 cd 命令的函数
+void executeCdCommand(std::shared_ptr<TreeNode> &receiver, std::shared_ptr<TreeNode> &currentDir, const std::string &input)
+{
+    // 找到引号的位置
+    size_t quoteStart = input.find('"');
+    if (quoteStart == std::string::npos)
+    {
+        std::cout << "输入格式不正确，缺少引号。" << std::endl;
+        return;
+    }
+    size_t quoteEnd = input.find('"', quoteStart + 1);
+    if (quoteEnd == std::string::npos)
+    {
+        std::cout << "输入格式不正确，缺少闭合的引号。" << std::endl;
+        return;
+    }
+
+    // 提取引号内的名称作为目标名称
+    std::string targetName = input.substr(quoteStart + 1, quoteEnd - quoteStart - 1);
+    std::shared_ptr<TreeNode> newDir = receiver->findNodeByName(targetName);
+    if (newDir)
+    {
+        currentDir = newDir;
+        std::cout << "当前目录为：" << targetName << std::endl;
+    }
+    else
+    {
+        std::cout << input << "找不到指定节点：" << targetName << std::endl;
+    }
+}

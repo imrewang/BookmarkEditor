@@ -4,25 +4,25 @@
 
 int main(int argc, char *argv[])
 {
-    std::string filePath;
-    std::shared_ptr<TreeNode> receiver;
-    std::shared_ptr<TreeNode> currentDir;
+    std::string filePath{};
+    std::shared_ptr<TreeNode> receiver{};
+    std::shared_ptr<TreeNode> currentDir{};
     std::unique_ptr<Invoker> invoker = std::make_unique<Invoker>();
     if (argc == 3 && std::string(argv[1]) == "open")
     {
         filePath = argv[2];
         std::cout << "打开文件：" << filePath << std::endl;
-        auto file = readFile(filePath);
-        receiver = constructTreeFromFile(file);
+        receiver = constructTreeFromFile(filePath);
         currentDir = receiver;
     }
 
     // 读取终端命令并执行相应操作
-    std::string input;
+    std::string input{};
     while (true)
     {
         std::cout << "请输入命令: ";
-        std::getline(std::cin, input);
+        std::getline(std::cin >> std::ws, input); // 忽略前导空白符
+        std::cout << "命令: " << input;
         // 查找空格的位置
         size_t spacePos = input.find(' ');
         std::string commandHead;
@@ -44,13 +44,13 @@ int main(int argc, char *argv[])
             std::cout << "文件未打开，无法执行其他操作。" << std::endl;
             continue;
         }
-        std::unique_ptr<Command> command;
+        std::unique_ptr<Command> command{};
         switch (commandType)
         {
         case CommandType::Bookmark:
             // 假设有一个处理Bookmark的函数command.substr(spacePos + 1)
             filePath = input.substr(spacePos + 1);
-            receiver = constructTreeFromFile(readFile(filePath));
+            receiver = constructTreeFromFile(filePath);
             currentDir = receiver;
             invoker.reset(new Invoker()); // 重置Invoker实例
             break;
@@ -70,10 +70,13 @@ int main(int argc, char *argv[])
             receiver->printTree();
             break;
         case CommandType::Cd:
-            currentDir = receiver->findNodeByName(input.substr(spacePos + 1));
+            executeCdCommand(receiver, currentDir, input);
             break;
         case CommandType::LsTree:
-            currentDir->printTree();
+            if (currentDir)
+            {
+                currentDir->printTree();
+            }
             break;
         case CommandType::Help:
             showHelp();

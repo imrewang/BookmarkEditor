@@ -2,7 +2,7 @@
 
 std::vector<std::string> readFile(const std::string &filename)
 {
-    std::vector<std::string> lines;
+    std::vector<std::string> lines{};
     std::ifstream file(filename);
     if (file.is_open())
     {
@@ -16,10 +16,10 @@ std::vector<std::string> readFile(const std::string &filename)
     return lines;
 }
 
-std::shared_ptr<TreeNode> constructTreeFromFile(const std::vector<std::string> &lines)
+std::shared_ptr<TreeNode> constructTree(const std::vector<std::string> &lines)
 {
-    std::stack<std::shared_ptr<TreeNode>> stack;
-    std::shared_ptr<TreeNode> rootNode;
+    std::stack<std::shared_ptr<TreeNode>> stack{};
+    std::shared_ptr<TreeNode> rootNode{};
 
     for (const auto &line : lines)
     {
@@ -86,6 +86,13 @@ std::shared_ptr<TreeNode> constructTreeFromFile(const std::vector<std::string> &
     }
 
     return rootNode;
+}
+
+std::shared_ptr<TreeNode> constructTreeFromFile(const std::string &filename)
+{
+    std::vector<std::string> lines = readFile(filename);
+    std::shared_ptr<TreeNode> treeRoot = constructTree(lines);
+    return treeRoot;
 }
 
 void writeTreeNode(std::ofstream &outFile, const std::shared_ptr<TreeNode> &node, int level)

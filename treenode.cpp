@@ -49,7 +49,7 @@ void TreeNode::printTree(const std::string &prefix, bool isLastSibling) const
 
 std::shared_ptr<TreeNode> TreeNode::findNodeByName(const std::string &name) const
 {
-    std::shared_ptr<TreeNode> result;
+    std::shared_ptr<TreeNode> result{};
 
     std::function<bool(const std::shared_ptr<TreeNode> &, const std::string &)> search =
         [&](const std::shared_ptr<TreeNode> &node, const std::string &target) -> bool
@@ -93,7 +93,10 @@ std::shared_ptr<TreeNode> TreeNode::findNodeByName(const std::string &name) cons
         return false; // 如果没有找到结果，则返回false
     };
 
-    search(std::const_pointer_cast<TreeNode>(shared_from_this()), name);
+    if (!search(std::const_pointer_cast<TreeNode>(shared_from_this()), name))
+    {
+        std::cout << "Node with name '" + name + "' not found." << std::endl;
+    }
     return result;
 }
 

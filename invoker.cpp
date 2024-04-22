@@ -8,9 +8,12 @@ Invoker::~Invoker()
 
 void Invoker::executeCommand(std::unique_ptr<Command> command)
 {
-    // TODO 1.只加入adddelete 2.clear redo stack
     command->execute();
     undoStack_.push(std::move(command)); // 保存命令以便可以撤销
+    while (!redoStack_.empty())
+    {
+        redoStack_.pop();
+    }
 }
 
 void Invoker::undo()

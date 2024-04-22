@@ -1,6 +1,9 @@
+#pragma once
+
 #include <string>
 #include <unordered_map>
 #include <iostream>
+#include "treenode.h"
 
 enum class CommandType
 {
@@ -37,3 +40,4 @@ static std::unordered_map<std::string, CommandType> command_map = {
 
 CommandType parseInput(const std::string &command);
 void showHelp();
+void executeCdCommand(std::shared_ptr<TreeNode> &receiver, std::shared_ptr<TreeNode> &currentDir, const std::string &input);

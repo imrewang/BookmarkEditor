@@ -54,5 +54,7 @@
         "map": "cpp",
         "stack": "cpp",
         "iomanip": "cpp"
-    }
+    },
+    //字体大小
+    "editor.fontSize": 16,
 }
