@@ -24,6 +24,11 @@ void Invoker::undo()
         undoStack_.pop();
         command->undo();
         redoStack_.push(std::move(command)); // 将命令移至重做栈
+        std::cout << "撤销上一步操作" << std::endl;
+    }
+    else
+    {
+        std::cout << "undoStack 为空。 无法执行 undo 操作。" << std::endl;
     }
 }
 
@@ -33,7 +38,12 @@ void Invoker::redo()
     {
         std::unique_ptr<Command> command = std::move(redoStack_.top());
         redoStack_.pop();
-        command->execute();
+        command->redo();
         undoStack_.push(std::move(command)); // 重做后重新放回撤销栈
+        std::cout << "重做上一步操作" << std::endl;
+    }
+    else
+    {
+        std::cout << "redoStack 为空。 无法执行 redo 操作。" << std::endl;
     }
 }

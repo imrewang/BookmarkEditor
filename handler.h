@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include <iostream>
 #include "treenode.h"
+#include "file.h"
+#include "invoker.h"
 
 enum class CommandType
 {
@@ -39,5 +41,12 @@ static std::unordered_map<std::string, CommandType> command_map = {
     {"exit", CommandType::Exit}};
 
 CommandType parseInput(const std::string &command);
+
+void handleOpenCommand(int argc, char *argv[],
+                       std::string &filePath, std::shared_ptr<TreeNode> &receiver, std::shared_ptr<TreeNode> &currentDir);
+void handleUserInput(std::shared_ptr<TreeNode> &receiver, std::shared_ptr<TreeNode> &currentDir,
+                     std::string &filePath, std::unique_ptr<Invoker> &invoker);
+
 void showHelp();
-void executeCdCommand(std::shared_ptr<TreeNode> &receiver, std::shared_ptr<TreeNode> &currentDir, const std::string &input);
+void executeCdCommand(std::shared_ptr<TreeNode> &receiver, std::shared_ptr<TreeNode> &currentDir,
+                      const std::string &input);
