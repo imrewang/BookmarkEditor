@@ -32,7 +32,7 @@ void showHelp()
 }
 
 // 执行 cd 命令的函数
-void executeCdCommand(std::shared_ptr<TreeNode> &receiver, std::shared_ptr<TreeNode> &currentDir, const std::string &input)
+void executeCdCommand(std::shared_ptr<TreeNodeBase> &receiver, std::shared_ptr<TreeNodeBase> &currentDir, const std::string &input)
 {
     // 找到引号的位置
     size_t quoteStart = input.find('"');
@@ -50,7 +50,7 @@ void executeCdCommand(std::shared_ptr<TreeNode> &receiver, std::shared_ptr<TreeN
 
     // 提取引号内的名称作为目标名称
     std::string targetName = input.substr(quoteStart + 1, quoteEnd - quoteStart - 1);
-    std::shared_ptr<TreeNode> newDir = receiver->findNodeByName(targetName);
+    std::shared_ptr<TreeNodeBase> newDir = receiver->findNodeByName(targetName);
     if (newDir)
     {
         currentDir = newDir;
@@ -62,7 +62,7 @@ void executeCdCommand(std::shared_ptr<TreeNode> &receiver, std::shared_ptr<TreeN
     }
 }
 
-void handleOpenCommand(int argc, char *argv[], std::string &filePath, std::shared_ptr<TreeNode> &receiver, std::shared_ptr<TreeNode> &currentDir)
+void handleOpenCommand(int argc, char *argv[], std::string &filePath, std::shared_ptr<TreeNodeBase> &receiver, std::shared_ptr<TreeNodeBase> &currentDir)
 {
     if (argc == 3 && std::string(argv[1]) == "open")
     {
@@ -73,7 +73,7 @@ void handleOpenCommand(int argc, char *argv[], std::string &filePath, std::share
     }
 }
 
-void handleUserInput(std::shared_ptr<TreeNode> &receiver, std::shared_ptr<TreeNode> &currentDir,
+void handleUserInput(std::shared_ptr<TreeNodeBase> &receiver, std::shared_ptr<TreeNodeBase> &currentDir,
                      std::string &filePath, std::unique_ptr<Invoker> &invoker)
 {
     // 读取终端命令并执行相应操作
