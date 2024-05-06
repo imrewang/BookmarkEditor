@@ -1,11 +1,21 @@
 #include "treenode.h" // 包含类的头文件
 
+<<<<<<< HEAD
 TreeNode::TreeNode(std::string data) : data_(data), children_(), parent_(), readCount_(0)
+=======
+TreeNode::TreeNode(std::string data)
+>>>>>>> b46e899bf1d9b9eece69512035f0d950ff9c740c
 {
+    this->setData(data);
     std::cout << "TreeNode constructed with header data" << std::endl;
 }
+<<<<<<< HEAD
 TreeNode::TreeNode(std::pair<std::string, std::string> data) : data_(data), children_(), parent_(), readCount_(0)
+=======
+TreeNode::TreeNode(std::pair<std::string, std::string> data)
+>>>>>>> b46e899bf1d9b9eece69512035f0d950ff9c740c
 {
+    this->setData(data);
     std::cout << "TreeNode constructed with bookmark data" << std::endl;
 }
 
@@ -21,6 +31,21 @@ TreeNode::~TreeNode()
         auto linkData = std::get<std::pair<std::string, std::string>>(data_);
         std::cout << "[" << linkData.first << "]" << std::endl;
     }
+}
+
+std::shared_ptr<TreeNodeBase> TreeNode::createNode(const DataType &data)
+{
+    if (std::holds_alternative<std::string>(data))
+    {
+        return std::make_shared<TreeNode>(std::get<std::string>(data));
+    }
+    else if (std::holds_alternative<std::pair<std::string, std::string>>(data))
+    {
+        return std::make_shared<TreeNode>(std::get<std::pair<std::string, std::string>>(data));
+    }
+    // 如果数据类型不匹配，返回空指针
+    std::cout << "Unsupported data type for parent node." << std::endl;
+    return nullptr;
 }
 
 void TreeNode::printTree(const std::string &prefix, bool isLastSibling) const
@@ -54,12 +79,12 @@ void TreeNode::printTree(const std::string &prefix, bool isLastSibling) const
     }
 }
 
-std::shared_ptr<TreeNode> TreeNode::findNodeByName(const std::string &name) const
+std::shared_ptr<TreeNodeBase> TreeNode::findNodeByName(const std::string &name) const
 {
-    std::shared_ptr<TreeNode> result{};
+    std::shared_ptr<TreeNodeBase> result{};
 
-    std::function<bool(const std::shared_ptr<TreeNode> &, const std::string &)> search =
-        [&](const std::shared_ptr<TreeNode> &node, const std::string &target) -> bool
+    std::function<bool(const std::shared_ptr<TreeNodeBase> &, const std::string &)> search =
+        [&](const std::shared_ptr<TreeNodeBase> &node, const std::string &target) -> bool
     {
         std::visit([&](const auto &data)
                    {
@@ -107,6 +132,7 @@ std::shared_ptr<TreeNode> TreeNode::findNodeByName(const std::string &name) cons
     return result;
 }
 
+<<<<<<< HEAD
 void TreeNode::read()
 {
     if (std::holds_alternative<std::string>(data_))
@@ -120,8 +146,11 @@ void TreeNode::read()
 }
 
 std::shared_ptr<TreeNode> TreeNode::addNodebyNode(const std::shared_ptr<TreeNode> &nodeToAdd)
+=======
+std::shared_ptr<TreeNodeBase> TreeNode::addNodebyNode(const std::shared_ptr<TreeNodeBase> &nodeToAdd)
+>>>>>>> b46e899bf1d9b9eece69512035f0d950ff9c740c
 {
-    std::shared_ptr<TreeNode> parentNode = nodeToAdd->getParent().lock();
+    std::shared_ptr<TreeNodeBase> parentNode = nodeToAdd->getParent().lock();
     if (parentNode)
     {
         parentNode->addChild(nodeToAdd);
@@ -133,25 +162,12 @@ std::shared_ptr<TreeNode> TreeNode::addNodebyNode(const std::shared_ptr<TreeNode
     return nodeToAdd;
 }
 
-std::shared_ptr<TreeNode> TreeNode::addNodebyName(const std::string &parentName, const DataType &data)
+std::shared_ptr<TreeNodeBase> TreeNode::addNodebyName(const std::string &parentName, const DataType &data)
 {
     auto parentNode = findNodeByName(parentName);
     if (parentNode)
     {
-        std::shared_ptr<TreeNode> newNode;
-        if (std::holds_alternative<std::string>(data))
-        {
-            newNode = std::make_shared<TreeNode>(std::get<std::string>(data));
-        }
-        else if (std::holds_alternative<std::pair<std::string, std::string>>(data))
-        {
-            newNode = std::make_shared<TreeNode>(std::get<std::pair<std::string, std::string>>(data));
-        }
-        else
-        {
-            std::cout << "Unsupported data type for parent node." << std::endl;
-            return nullptr;
-        }
+        std::shared_ptr<TreeNodeBase> newNode = TreeNode::createNode(data);
         parentNode->addChildWithParent(newNode);
         return newNode;
     }
@@ -162,9 +178,9 @@ std::shared_ptr<TreeNode> TreeNode::addNodebyName(const std::string &parentName,
     }
 }
 
-std::shared_ptr<TreeNode> TreeNode::deleteNodebyNode(const std::shared_ptr<TreeNode> &nodeToDelete)
+std::shared_ptr<TreeNodeBase> TreeNode::deleteNodebyNode(const std::shared_ptr<TreeNodeBase> &nodeToDelete)
 {
-    std::shared_ptr<TreeNode> deletedNode;
+    std::shared_ptr<TreeNodeBase> deletedNode;
     if (nodeToDelete)
     {
         auto parentNode = nodeToDelete->getParent().lock();
@@ -186,9 +202,9 @@ std::shared_ptr<TreeNode> TreeNode::deleteNodebyNode(const std::shared_ptr<TreeN
     return deletedNode;
 }
 
-std::shared_ptr<TreeNode> TreeNode::deleteNodebyName(const std::string &name)
+std::shared_ptr<TreeNodeBase> TreeNode::deleteNodebyName(const std::string &name)
 {
-    std::shared_ptr<TreeNode> deletedNode;
+    std::shared_ptr<TreeNodeBase> deletedNode;
     auto nodeToDelete = findNodeByName(name);
     if (nodeToDelete)
     {
@@ -207,20 +223,20 @@ void TreeNode::setData(DataType data)
     data_ = data;
 }
 
-void TreeNode::setParent(std::weak_ptr<TreeNode> parent)
+void TreeNode::setParent(std::weak_ptr<TreeNodeBase> parent)
 {
     parent_ = parent;
 }
 
-void TreeNode::addChild(std::shared_ptr<TreeNode> child)
+void TreeNode::addChild(std::shared_ptr<TreeNodeBase> child)
 {
     children_.push_back(child);
 }
 
-void TreeNode::addChildWithParent(std::shared_ptr<TreeNode> child)
+void TreeNode::addChildWithParent(std::shared_ptr<TreeNodeBase> child)
 {
     children_.push_back(child);
-    child->parent_ = this->shared_from_this(); // 设置子节点的父节点为当前节点
+    child->setParent(this->shared_from_this());
 }
 
 void TreeNode::setReadCount(int readCount)
@@ -229,7 +245,7 @@ void TreeNode::setReadCount(int readCount)
 }
 
 // get
-std::shared_ptr<TreeNode> TreeNode::getTreeNode()
+std::shared_ptr<TreeNodeBase> TreeNode::getTreeNode()
 {
     return shared_from_this();
 }
@@ -239,12 +255,12 @@ TreeNode::DataType TreeNode::getData() const
     return data_;
 }
 
-std::vector<std::shared_ptr<TreeNode>> &TreeNode::getChildren()
+std::vector<std::shared_ptr<TreeNodeBase>> &TreeNode::getChildren()
 {
     return children_;
 }
 
-std::weak_ptr<TreeNode> TreeNode::getParent() const
+std::weak_ptr<TreeNodeBase> TreeNode::getParent() const
 {
     return parent_;
 }

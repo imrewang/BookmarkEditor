@@ -17,12 +17,12 @@ public:
 class AddCommand : public Command
 {
 private:
-    std::shared_ptr<TreeNode> receiver_; // 示例中用的是树节点
-    std::shared_ptr<TreeNode> addNode_;
+    std::shared_ptr<TreeNodeBase> receiver_; // 示例中用的是树节点
+    std::shared_ptr<TreeNodeBase> addNode_;
     std::string input_;
 
 public:
-    AddCommand(std::shared_ptr<TreeNode> receiver, std::string input) : receiver_(receiver), input_(input), addNode_(nullptr) {}
+    AddCommand(std::shared_ptr<TreeNodeBase> receiver, std::string input) : receiver_(receiver), input_(input), addNode_(nullptr) {}
     void execute() override;
     void undo() override;
     void redo() override;
@@ -31,12 +31,12 @@ public:
 class DeleteCommand : public Command
 {
 private:
-    std::shared_ptr<TreeNode> receiver_;
-    std::shared_ptr<TreeNode> deleteNode_;
+    std::shared_ptr<TreeNodeBase> receiver_;
+    std::shared_ptr<TreeNodeBase> deleteNode_;
     std::string input_;
 
 public:
-    DeleteCommand(std::shared_ptr<TreeNode> receiver, std::string input) : receiver_(receiver), input_(input), deleteNode_(nullptr) {}
+    DeleteCommand(std::shared_ptr<TreeNodeBase> receiver, std::string input) : receiver_(receiver), input_(input), deleteNode_(nullptr) {}
     void execute() override;
     void undo() override;
     void redo() override;

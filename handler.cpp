@@ -32,8 +32,13 @@ void showHelp()
               << "exit    - 退出程序\n";
 }
 
+<<<<<<< HEAD
 // 从输入中提取目标名称
 std::string extractTargetName(const std::string &input)
+=======
+// 执行 cd 命令的函数
+void executeCdCommand(std::shared_ptr<TreeNodeBase> &receiver, std::shared_ptr<TreeNodeBase> &currentDir, const std::string &input)
+>>>>>>> b46e899bf1d9b9eece69512035f0d950ff9c740c
 {
     size_t quoteStart = input.find('"');
     if (quoteStart == std::string::npos)
@@ -48,6 +53,7 @@ std::string extractTargetName(const std::string &input)
         return "";
     }
 
+<<<<<<< HEAD
     return input.substr(quoteStart + 1, quoteEnd - quoteStart - 1);
 }
 
@@ -56,6 +62,12 @@ void executeCdCommand(std::shared_ptr<TreeNode> &receiver, std::shared_ptr<TreeN
 {
     std::string targetName = extractTargetName(input);
     if (!targetName.empty())
+=======
+    // 提取引号内的名称作为目标名称
+    std::string targetName = input.substr(quoteStart + 1, quoteEnd - quoteStart - 1);
+    std::shared_ptr<TreeNodeBase> newDir = receiver->findNodeByName(targetName);
+    if (newDir)
+>>>>>>> b46e899bf1d9b9eece69512035f0d950ff9c740c
     {
         std::shared_ptr<TreeNode> newDir = receiver->findNodeByName(targetName);
         if (newDir)
@@ -88,7 +100,7 @@ void executeReadBookmark(std::shared_ptr<TreeNode> &receiver, const std::string 
     }
 }
 
-void handleOpenCommand(int argc, char *argv[], std::string &filePath, std::shared_ptr<TreeNode> &receiver, std::shared_ptr<TreeNode> &currentDir)
+void handleOpenCommand(int argc, char *argv[], std::string &filePath, std::shared_ptr<TreeNodeBase> &receiver, std::shared_ptr<TreeNodeBase> &currentDir)
 {
     if (argc == 3 && std::string(argv[1]) == "open")
     {
@@ -99,7 +111,7 @@ void handleOpenCommand(int argc, char *argv[], std::string &filePath, std::share
     }
 }
 
-void handleUserInput(std::shared_ptr<TreeNode> &receiver, std::shared_ptr<TreeNode> &currentDir,
+void handleUserInput(std::shared_ptr<TreeNodeBase> &receiver, std::shared_ptr<TreeNodeBase> &currentDir,
                      std::string &filePath, std::unique_ptr<Invoker> &invoker)
 {
     // 读取终端命令并执行相应操作
