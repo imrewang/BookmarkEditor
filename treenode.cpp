@@ -1,10 +1,10 @@
 #include "treenode.h" // 包含类的头文件
 
-TreeNode::TreeNode(std::string data) : data_(data), children_(), parent_()
+TreeNode::TreeNode(std::string data) : data_(data), children_(), parent_(), readCount_(0)
 {
     std::cout << "TreeNode constructed with header data" << std::endl;
 }
-TreeNode::TreeNode(std::pair<std::string, std::string> data) : data_(data), children_(), parent_()
+TreeNode::TreeNode(std::pair<std::string, std::string> data) : data_(data), children_(), parent_(), readCount_(0)
 {
     std::cout << "TreeNode constructed with bookmark data" << std::endl;
 }
@@ -36,7 +36,14 @@ void TreeNode::printTree(const std::string &prefix, bool isLastSibling) const
     else if (std::holds_alternative<std::pair<std::string, std::string>>(data_))
     {
         auto linkData = std::get<std::pair<std::string, std::string>>(data_);
-        std::cout << "[" << linkData.first << "]" << std::endl;
+        if (readCount_ > 0)
+        {
+            std::cout << "[*" << linkData.first << "(" << readCount_ << ")]" << std::endl;
+        }
+        else
+        {
+            std::cout << "[" << linkData.first << "]" << std::endl;
+        }
     }
 
     // 递归打印子节点
@@ -98,6 +105,18 @@ std::shared_ptr<TreeNode> TreeNode::findNodeByName(const std::string &name) cons
         std::cout << "Node with name '" + name + "' not found." << std::endl;
     }
     return result;
+}
+
+void TreeNode::read()
+{
+    if (std::holds_alternative<std::string>(data_))
+    {
+        std::cout << "无法对目录节点进行 Read 操作" << std::endl;
+    }
+    else if (std::holds_alternative<std::pair<std::string, std::string>>(data_))
+    {
+        readCount_++;
+    }
 }
 
 std::shared_ptr<TreeNode> TreeNode::addNodebyNode(const std::shared_ptr<TreeNode> &nodeToAdd)
@@ -204,6 +223,11 @@ void TreeNode::addChildWithParent(std::shared_ptr<TreeNode> child)
     child->parent_ = this->shared_from_this(); // 设置子节点的父节点为当前节点
 }
 
+void TreeNode::setReadCount(int readCount)
+{
+    readCount_ = readCount;
+}
+
 // get
 std::shared_ptr<TreeNode> TreeNode::getTreeNode()
 {
@@ -223,4 +247,9 @@ std::vector<std::shared_ptr<TreeNode>> &TreeNode::getChildren()
 std::weak_ptr<TreeNode> TreeNode::getParent() const
 {
     return parent_;
+}
+
+int TreeNode::getReadCount() const
+{
+    return readCount_;
 }

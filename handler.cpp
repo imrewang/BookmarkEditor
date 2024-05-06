@@ -22,6 +22,7 @@ void showHelp()
               << "redo    - 重做上一次操作\n"
               << "show-tree   - 显示当前书签树结构\n"
               << "cd at \"<名称>\"  - 将当前位置切换到指定标题下的指定书签\n"
+              << "read-bookmark \"<名称>\" - 访问指定节点\n"
               << "ls-tree - 列出当前标题下的所有子节点\n"
               << "add-title \"<名称>\"  - 在当前位置添加一个标题节点\n"
               << "add-title \"<名称1>\" at \"<名称2>\"    - 在指定标题下添加一个标题节点\n"
@@ -31,34 +32,59 @@ void showHelp()
               << "exit    - 退出程序\n";
 }
 
-// 执行 cd 命令的函数
-void executeCdCommand(std::shared_ptr<TreeNode> &receiver, std::shared_ptr<TreeNode> &currentDir, const std::string &input)
+// 从输入中提取目标名称
+std::string extractTargetName(const std::string &input)
 {
-    // 找到引号的位置
     size_t quoteStart = input.find('"');
     if (quoteStart == std::string::npos)
     {
         std::cout << "输入格式不正确，缺少引号。" << std::endl;
-        return;
+        return "";
     }
     size_t quoteEnd = input.find('"', quoteStart + 1);
     if (quoteEnd == std::string::npos)
     {
         std::cout << "输入格式不正确，缺少闭合的引号。" << std::endl;
-        return;
+        return "";
     }
 
-    // 提取引号内的名称作为目标名称
-    std::string targetName = input.substr(quoteStart + 1, quoteEnd - quoteStart - 1);
-    std::shared_ptr<TreeNode> newDir = receiver->findNodeByName(targetName);
-    if (newDir)
+    return input.substr(quoteStart + 1, quoteEnd - quoteStart - 1);
+}
+
+// 执行 cd 命令的函数
+void executeCdCommand(std::shared_ptr<TreeNode> &receiver, std::shared_ptr<TreeNode> &currentDir, const std::string &input)
+{
+    std::string targetName = extractTargetName(input);
+    if (!targetName.empty())
     {
-        currentDir = newDir;
-        std::cout << "当前目录为：" << targetName << std::endl;
+        std::shared_ptr<TreeNode> newDir = receiver->findNodeByName(targetName);
+        if (newDir)
+        {
+            currentDir = newDir;
+            std::cout << "当前目录为：" << targetName << std::endl;
+        }
+        else
+        {
+            std::cout << "找不到指定 Cd 节点：" << targetName << std::endl;
+        }
     }
-    else
+}
+
+// 执行 cd 命令的函数
+void executeReadBookmark(std::shared_ptr<TreeNode> &receiver, const std::string &input)
+{
+    std::string targetName = extractTargetName(input);
+    if (!targetName.empty())
     {
-        std::cout << input << "找不到指定节点：" << targetName << std::endl;
+        std::shared_ptr<TreeNode> readNode = receiver->findNodeByName(targetName);
+        if (readNode)
+        {
+            readNode->read();
+        }
+        else
+        {
+            std::cout << "找不到指定 Read 节点：" << targetName << std::endl;
+        }
     }
 }
 
@@ -128,6 +154,9 @@ void handleUserInput(std::shared_ptr<TreeNode> &receiver, std::shared_ptr<TreeNo
             break;
         case CommandType::Cd:
             executeCdCommand(receiver, currentDir, input);
+            break;
+        case CommandType::ReadBookmark:
+            executeReadBookmark(receiver, input);
             break;
         case CommandType::LsTree:
             if (currentDir)

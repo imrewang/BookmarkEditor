@@ -20,6 +20,7 @@ public:
 
     void printTree(const std::string &prefix = "", bool isLastSibling = true) const;
     std::shared_ptr<TreeNode> findNodeByName(const std::string &name) const;
+    void read();
     // add delete
     std::shared_ptr<TreeNode> addNodebyNode(const std::shared_ptr<TreeNode> &nodeToAdd);
     std::shared_ptr<TreeNode> addNodebyName(const std::string &parentName, const DataType &data);
@@ -31,11 +32,13 @@ public:
     void setParent(std::weak_ptr<TreeNode> parent);
     void addChild(std::shared_ptr<TreeNode> child);
     void addChildWithParent(std::shared_ptr<TreeNode> child);
+    void setReadCount(int readCount);
     // get
     std::shared_ptr<TreeNode> getTreeNode();
     DataType getData() const;
     std::vector<std::shared_ptr<TreeNode>> &getChildren();
     std::weak_ptr<TreeNode> getParent() const;
+    int getReadCount() const;
 
 private:
     // 数据成员
@@ -44,4 +47,6 @@ private:
     std::vector<std::shared_ptr<TreeNode>> children_;
     // 父节点的弱引用
     std::weak_ptr<TreeNode> parent_;
+    // 节点read次数
+    int readCount_;
 };
